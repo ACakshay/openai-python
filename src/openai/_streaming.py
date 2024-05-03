@@ -56,11 +56,15 @@ class Stream(Generic[_T]):
         iterator = self._iter_events()
 
         for sse in iterator:
-            if sse.data.startswith("[DONE]"):
+            if sse.data.startswith('["DONE"]'):
                 break
-
+ 
             if sse.event is None:
-                data = sse.json()
+                try:
+                    data = sse.json()
+                except json.JSONDecodeError:
+                    continue
+                
                 if is_mapping(data) and data.get("error"):
                     message = None
                     error = data.get("error")
